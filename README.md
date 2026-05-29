@@ -1,3 +1,8 @@
+![React](https://img.shields.io/badge/React-19-blue)
+![Node.js](https://img.shields.io/badge/Node.js-Express-green)
+![WebRTC](https://img.shields.io/badge/WebRTC-RealTime-orange)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-black)
+
 # MeetSpace 🚀
 
 A full-stack real-time video conferencing platform built using the MERN stack, WebRTC, and Socket.IO. MeetSpace enables users to create and join virtual meeting rooms with video/audio communication, real-time chat, collaborative whiteboard functionality, and screen sharing.
