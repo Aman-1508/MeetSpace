@@ -13,6 +13,24 @@ A full-stack real-time video conferencing platform built using the MERN stack, W
 * 📋 Copy & Share Meeting Codes
 * 📱 Responsive User Interface
 
+## 📸 Screenshots
+
+### Landing Page
+
+![Landing Page](screenshots/landingPage.png)
+
+### Home Page
+
+![Home Page](screenshots/HomePage.png)
+
+### Meeting Room
+
+![Meeting Room](screenshots/MeetingSpace1.png)
+
+### Collaborative Whiteboard
+
+![Whiteboard](screenshots/WhiteBoard.png)
+
 ## 🛠️ Tech Stack
 
 ### Frontend
