@@ -7,6 +7,10 @@
 
 A full-stack real-time video conferencing platform built using the MERN stack, WebRTC, and Socket.IO. MeetSpace enables users to create and join virtual meeting rooms with video/audio communication, real-time chat, collaborative whiteboard functionality, and screen sharing.
 
+🔗 Live Demo: https://meet-space-sepia.vercel.app
+
+🔗 Backend API: https://meetspace-backend-s3uy.onrender.com
+
 ## ✨ Features
 
 * 🔐 JWT-based Authentication
