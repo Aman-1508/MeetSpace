@@ -11,6 +11,7 @@ export default function Home() {
     const [joinCode, setJoinCode] = useState("");
     const [activity, setActivity] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
+    const [joining, setJoining] = useState(false);
 
     useEffect(() => {
         fetchActivity();
@@ -26,9 +27,22 @@ export default function Home() {
             setLoadingHistory(false);
         }
     };
+    
+    const joinMeeting = async () => {
+        if (!joinCode.trim()) return toast.error("Enter a meeting code");
+        setJoining(true);
+        try {
+            const { data } = await API.get(`/users/validate_meeting/${joinCode.trim()}`);
+            if (data.valid) navigate(`/room/${joinCode.trim()}`);
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Invalid meeting code");
+        } finally {
+            setJoining(false);
+        }
+    };
 
     const createMeeting = async () => {
-        const roomId = uuidv4().slice(0, 8); // short 8-char code
+        const roomId = uuidv4().slice(0, 8);
         try {
             await API.post("/users/add_to_activity", { meetingCode: roomId });
             navigate(`/room/${roomId}`);
@@ -37,9 +51,17 @@ export default function Home() {
         }
     };
 
-    const joinMeeting = () => {
+    const joinMeeting = async () => {
         if (!joinCode.trim()) return toast.error("Enter a meeting code");
-        navigate(`/room/${joinCode.trim()}`);
+
+        try {
+            const { data } = await API.get(`/users/validate_meeting/${joinCode.trim()}`);
+            if (data.valid) {
+                navigate(`/room/${joinCode.trim()}`);
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Invalid meeting code");
+        }
     };
 
     const formatDate = (dateStr) => {
@@ -126,11 +148,12 @@ export default function Home() {
                                 className="flex-1 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
                             />
                             <button
-                                onClick={joinMeeting}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition"
-                            >
-                                Join
-                            </button>
+                            onClick={joinMeeting}
+                            disabled={joining}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition"
+                        >
+                            {joining ? "Checking..." : "Join"}
+                        </button>
                         </div>
                     </div>
 

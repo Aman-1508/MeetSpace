@@ -7,6 +7,7 @@ import ChatPanel from "../components/ChatPanel";
 import MediaControls from "../components/MediaControls";
 import Whiteboard from "../components/Whiteboard";
 import toast from "react-hot-toast";
+import API from "../utils/api";
 
 export default function Room() {
     const { roomId } = useParams();
@@ -29,7 +30,7 @@ export default function Room() {
     const { peers, replaceTrack } = useWebRTC(roomId, localStream);
     const peerCount        = Object.keys(peers).length;
     const totalParticipants = peerCount + 1;
-
+        
     /* ── timer ── */
     useEffect(() => {
         const t = setInterval(() => setElapsed(s => s + 1), 1000);
@@ -37,6 +38,21 @@ export default function Room() {
     }, []);
     const fmt = s => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
 
+    useEffect(() => {
+        const verifyRoom = async () => {
+            try {
+                const { data } = await API.get(`/users/validate_meeting/${roomId}`);
+                if (!data.valid) {
+                    toast.error("Invalid meeting room");
+                    navigate("/");
+                }
+            } catch {
+                toast.error("This meeting doesn't exist");
+                navigate("/");
+            }
+        };
+        verifyRoom();
+    }, [roomId, navigate]);
     /* ── camera ── */
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })

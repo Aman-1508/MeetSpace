@@ -123,3 +123,15 @@ export const getAllActivity = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
+// GET /api/v1/users/validate_meeting/:code
+    export const validateMeeting = async (req, res) => {
+        try {
+            const meeting = await Meeting.findOne({ meetingCode: req.params.code });
+            if (!meeting) {
+                return res.status(404).json({ valid: false, message: "Meeting not found. Check your code." });
+            }
+            return res.status(200).json({ valid: true, meeting });
+        } catch (err) {
+            return res.status(500).json({ valid: false, message: "Server error" });
+        }
+    };

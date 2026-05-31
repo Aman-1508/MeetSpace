@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
+import { Meeting } from "../models/meeting.model.js";
 
 const connections = {};
 const messages = {};
@@ -30,29 +31,42 @@ export const connectToSocket = (server) => {
     io.on("connection", (socket) => {
         console.log(`User connected: ${socket.user?.id} (${socket.id})`);
 
-        socket.on("join-call", (path) => {
-            if (!connections[path]) connections[path] = [];
+        socket.on("join-call", async (path) => {
+            try {
+                // Verify meeting exists in DB before allowing anyone in
+                const meeting = await Meeting.findOne({ meetingCode: path });
 
-            if (connections[path].length >= MAX_PARTICIPANTS) {
-                socket.emit("room-full");
-                return;
+                if (!meeting) {
+                    socket.emit("invalid-room");   // tell client it's not valid
+                    return;
+                }
+
+                if (connections[path] === undefined) {
+                    connections[path] = [];
+                }
+
+                connections[path].push(socket.id);
+                timeOnline[socket.id] = new Date();
+
+                connections[path].forEach((id) => {
+                    io.to(id).emit("user-joined", socket.id, connections[path]);
+                });
+
+                if (messages[path] !== undefined) {
+                    messages[path].forEach((msg) => {
+                        io.to(socket.id).emit(
+                            "chat-message",
+                            msg.data,
+                            msg.sender,
+                            msg["socket-id-sender"]
+                        );
+                    });
+                }
+            } catch (err) {
+                console.error("join-call error:", err.message);
+                socket.emit("invalid-room");
             }
-
-            connections[path].push(socket.id);
-            timeOnline[socket.id] = new Date();
-            socket.join(path); // use Socket.IO rooms for cleaner broadcasting
-
-            // Notify all peers in room
-            connections[path].forEach((id) => {
-                io.to(id).emit("user-joined", socket.id, connections[path]);
-            });
-
-            // Replay chat history for late joiners
-            (messages[path] || []).forEach((msg) => {
-                socket.emit("chat-message", msg.data, msg.sender, msg["socket-id-sender"]);
-            });
         });
-
         socket.on("signal", (toId, message) => {
             io.to(toId).emit("signal", socket.id, message);
         });
