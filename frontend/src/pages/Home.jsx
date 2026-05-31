@@ -28,19 +28,7 @@ export default function Home() {
         }
     };
     
-    const joinMeeting = async () => {
-        if (!joinCode.trim()) return toast.error("Enter a meeting code");
-        setJoining(true);
-        try {
-            const { data } = await API.get(`/users/validate_meeting/${joinCode.trim()}`);
-            if (data.valid) navigate(`/room/${joinCode.trim()}`);
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Invalid meeting code");
-        } finally {
-            setJoining(false);
-        }
-    };
-
+ 
     const createMeeting = async () => {
         const roomId = uuidv4().slice(0, 8);
         try {
@@ -51,16 +39,16 @@ export default function Home() {
         }
     };
 
-    const joinMeeting = async () => {
+      const joinMeeting = async () => {
         if (!joinCode.trim()) return toast.error("Enter a meeting code");
-
+        setJoining(true);
         try {
             const { data } = await API.get(`/users/validate_meeting/${joinCode.trim()}`);
-            if (data.valid) {
-                navigate(`/room/${joinCode.trim()}`);
-            }
+            if (data.valid) navigate(`/room/${joinCode.trim()}`);
         } catch (err) {
             toast.error(err.response?.data?.message || "Invalid meeting code");
+        } finally {
+            setJoining(false);
         }
     };
 
