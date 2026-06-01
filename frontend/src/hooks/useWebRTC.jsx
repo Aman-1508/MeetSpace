@@ -1,10 +1,32 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getSocket } from "./useSocket";
 
+
 const ICE_SERVERS = {
     iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
+        {
+            urls: "stun:stun.relay.metered.ca:80",
+        },
+        {
+            urls: "turn:global.relay.metered.ca:80",
+            username: "f84ed9f37539d4dec088ba1d",
+            credential: "mGyUe9ex4LJmstB8",
+        },
+        {
+            urls: "turn:global.relay.metered.ca:80?transport=tcp",
+            username: "f84ed9f37539d4dec088ba1d",
+            credential: "mGyUe9ex4LJmstB8",
+        },
+        {
+            urls: "turn:global.relay.metered.ca:443",
+            username: "f84ed9f37539d4dec088ba1d",
+            credential: "mGyUe9ex4LJmstB8",
+        },
+        {
+            urls: "turns:global.relay.metered.ca:443?transport=tcp",
+            username: "f84ed9f37539d4dec088ba1d",
+            credential: "mGyUe9ex4LJmstB8",
+        },
     ],
 };
 
@@ -16,6 +38,7 @@ export const useWebRTC = (roomId, localStream) => {
     const createPeer = useCallback((targetId, isInitiator) => {
         if (peersRef.current[targetId]) return peersRef.current[targetId];
 
+        
         const peer = new RTCPeerConnection(ICE_SERVERS);
 
         if (localStream) {
@@ -31,6 +54,10 @@ export const useWebRTC = (roomId, localStream) => {
                     candidate: e.candidate,
                 });
             }
+        };
+
+        peer.oniceconnectionstatechange = () => {
+            console.log(`ICE [${targetId}]:`, peer.iceConnectionState);
         };
 
         peer.ontrack = (e) => {
@@ -88,11 +115,15 @@ export const useWebRTC = (roomId, localStream) => {
                     });
             } else if (message.type === "answer") {
                 const peer = peersRef.current[fromId];
-                if (peer) peer.setRemoteDescription(new RTCSessionDescription(message.sdp));
+                if (peer) peer.setRemoteDescription(
+                    new RTCSessionDescription(message.sdp)
+                );
             } else if (message.type === "ice-candidate") {
                 const peer = peersRef.current[fromId];
                 if (peer && message.candidate) {
-                    peer.addIceCandidate(new RTCIceCandidate(message.candidate)).catch(() => {});
+                    peer.addIceCandidate(
+                        new RTCIceCandidate(message.candidate)
+                    ).catch(() => {});
                 }
             }
         });
@@ -119,9 +150,8 @@ export const useWebRTC = (roomId, localStream) => {
         };
     }, [roomId, localStream, socket, createPeer]);
 
-    // Replace track when stream changes (screen share / cam toggle)
     const replaceTrack = useCallback((newStream) => {
-        const videoTrack = newStream.getVideoTracks()[0];
+        const videoTrack = newStream?.getVideoTracks()[0];
         Object.values(peersRef.current).forEach(peer => {
             const sender = peer.getSenders().find(s => s.track?.kind === "video");
             if (sender && videoTrack) sender.replaceTrack(videoTrack);
