@@ -135,3 +135,22 @@ export const getAllActivity = async (req, res) => {
             return res.status(500).json({ valid: false, message: "Server error" });
         }
     };
+
+// GET /api/v1/users/ice-servers
+    export const getIceServers = async (req, res) => {
+        try {
+            // Credentials stay on server — never exposed to frontend
+            const response = await fetch(
+                `https://meetspace-app.metered.live/api/v1/turn/credentials?apiKey=${process.env.METERED_API_KEY}`
+            );
+            const iceServers = await response.json();
+            return res.status(200).json({ iceServers });
+        } catch (err) {
+            // Fallback if Metered is down
+            return res.status(200).json({
+                iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" },
+                ],
+            });
+        }
+    };

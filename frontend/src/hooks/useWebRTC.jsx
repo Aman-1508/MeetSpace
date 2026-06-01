@@ -1,45 +1,39 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getSocket } from "./useSocket";
-
-
-const ICE_SERVERS = {
-    iceServers: [
-        {
-            urls: "stun:stun.relay.metered.ca:80",
-        },
-        {
-            urls: "turn:global.relay.metered.ca:80",
-            username: "f84ed9f37539d4dec088ba1d",
-            credential: "mGyUe9ex4LJmstB8",
-        },
-        {
-            urls: "turn:global.relay.metered.ca:80?transport=tcp",
-            username: "f84ed9f37539d4dec088ba1d",
-            credential: "mGyUe9ex4LJmstB8",
-        },
-        {
-            urls: "turn:global.relay.metered.ca:443",
-            username: "f84ed9f37539d4dec088ba1d",
-            credential: "mGyUe9ex4LJmstB8",
-        },
-        {
-            urls: "turns:global.relay.metered.ca:443?transport=tcp",
-            username: "f84ed9f37539d4dec088ba1d",
-            credential: "mGyUe9ex4LJmstB8",
-        },
-    ],
-};
+import API from "../utils/api";
 
 export const useWebRTC = (roomId, localStream) => {
     const socket = getSocket();
     const peersRef = useRef({});
     const [peers, setPeers] = useState({});
 
+    const [iceServers, setIceServers] = useState([
+        { urls: "stun:stun.l.google.com:19302" }, // fallback only
+    ]);
+    const iceReadyRef = useRef(false);
+
+    // Fetch TURN credentials from your backend on mount
+    useEffect(() => {
+        const fetchIceServers = async () => {
+            try {
+                const { data } = await API.get("/users/ice-servers");
+                if (data.iceServers?.length) {
+                    setIceServers(data.iceServers);
+                    iceReadyRef.current = true;
+                    console.log("✅ ICE servers loaded");
+                }
+            } catch {
+                console.warn("⚠️ Using STUN only");
+                iceReadyRef.current = true;
+            }
+        };
+        fetchIceServers();
+    }, []);
+
     const createPeer = useCallback((targetId, isInitiator) => {
         if (peersRef.current[targetId]) return peersRef.current[targetId];
 
-        
-        const peer = new RTCPeerConnection(ICE_SERVERS);
+        const peer = new RTCPeerConnection({ iceServers });
 
         if (localStream) {
             localStream.getTracks().forEach(track => {
@@ -88,7 +82,7 @@ export const useWebRTC = (roomId, localStream) => {
 
         peersRef.current[targetId] = peer;
         return peer;
-    }, [socket, localStream]);
+    }, [socket, localStream, iceServers]);
 
     useEffect(() => {
         if (!localStream || !roomId) return;
@@ -96,9 +90,7 @@ export const useWebRTC = (roomId, localStream) => {
         socket.emit("join-call", roomId);
 
         socket.on("user-joined", (userId) => {
-            if (userId !== socket.id) {
-                createPeer(userId, true);
-            }
+            if (userId !== socket.id) createPeer(userId, true);
         });
 
         socket.on("signal", (fromId, message) => {
@@ -115,15 +107,11 @@ export const useWebRTC = (roomId, localStream) => {
                     });
             } else if (message.type === "answer") {
                 const peer = peersRef.current[fromId];
-                if (peer) peer.setRemoteDescription(
-                    new RTCSessionDescription(message.sdp)
-                );
+                if (peer) peer.setRemoteDescription(new RTCSessionDescription(message.sdp));
             } else if (message.type === "ice-candidate") {
                 const peer = peersRef.current[fromId];
                 if (peer && message.candidate) {
-                    peer.addIceCandidate(
-                        new RTCIceCandidate(message.candidate)
-                    ).catch(() => {});
+                    peer.addIceCandidate(new RTCIceCandidate(message.candidate)).catch(() => {});
                 }
             }
         });
