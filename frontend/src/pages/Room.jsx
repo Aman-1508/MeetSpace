@@ -8,12 +8,13 @@ import MediaControls from "../components/MediaControls";
 import Whiteboard from "../components/Whiteboard";
 import toast from "react-hot-toast";
 import API from "../utils/api";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 export default function Room() {
     const { roomId } = useParams();
     const { user } = useAuth();
     const navigate = useNavigate();
-
+    const isMobile = useIsMobile();
     const [localStream, setLocalStream]     = useState(null);
     const [isMuted, setIsMuted]             = useState(false);
     const [isVideoOff, setIsVideoOff]       = useState(false);
@@ -121,10 +122,11 @@ export default function Room() {
     };
 
     /* ── grid columns ── */
-    const cols = showWhiteboard ? 1
-        : totalParticipants === 1 ? 1
-        : totalParticipants <= 4  ? 2
-        : 3;
+    const cols = isMobile ? 1                       
+    : showWhiteboard ? 1
+    : totalParticipants === 1 ? 1
+    : totalParticipants <= 4  ? 2
+    : 3;
 
     /* ── all participants ── */
     const allParticipants = [
@@ -137,52 +139,60 @@ export default function Room() {
         <div style={{ height:"100vh", display:"flex", flexDirection:"column", background:"#030712", overflow:"hidden" }}>
 
             {/* ── TOP BAR ── */}
-            <div style={{
-                display:"flex", alignItems:"center", justifyContent:"space-between",
-                padding:"0 20px", height:52, flexShrink:0,
-                borderBottom:"1px solid #1f2937", background:"#030712",
-            }}>
-                {/* logo */}
-                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                    <div style={{ width:30,height:30,background:"#2563eb",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center" }}>
-                        <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
-                            <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/>
-                        </svg>
+                <div style={{
+                    display:"flex", alignItems:"center", justifyContent:"space-between",
+                    padding:"0 14px", height:52, flexShrink:0,
+                    borderBottom:"1px solid #1f2937", background:"#030712",
+                }}>
+                    {/* Logo */}
+                    <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+                        <div style={{ width:30,height:30,background:"#2563eb",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center" }}>
+                            <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
+                                <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/>
+                            </svg>
+                        </div>
+                        {/* Hide app name on mobile */}
+                        {!isMobile && (
+                            <span style={{ color:"white", fontWeight:600, fontSize:14 }}>MeetSpace</span>
+                        )}
                     </div>
-                    <span style={{ color:"white", fontWeight:600, fontSize:14 }}>MeetSpace</span>
+
+                    {/* Center info */}
+                    <div style={{ display:"flex", alignItems:"center", gap: isMobile ? 8 : 12 }}>
+                        <button onClick={copyCode} style={{
+                            display:"flex", alignItems:"center", gap:6, cursor:"pointer",
+                            background:"#111827", border:"1px solid #374151",
+                            borderRadius:10, padding:"5px 10px",
+                        }}>
+                            {/* Shorten code on mobile */}
+                            <span style={{ fontFamily:"monospace", color:"#d1d5db", fontSize: isMobile ? 11 : 13 }}>
+                                {isMobile ? roomId.slice(0, 6) + "..." : roomId}
+                            </span>
+                            <svg width="12" height="12" fill={copied ? "#4ade80" : "#6b7280"} viewBox="0 0 24 24">
+                                {copied
+                                    ? <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                    : <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                }
+                            </svg>
+                        </button>
+
+                        <span style={{ fontSize:11, color:"#9ca3af", display:"flex", alignItems:"center", gap:4 }}>
+                            <span style={{ width:6,height:6,background:"#22c55e",borderRadius:"50%",display:"inline-block" }}/>
+                            {totalParticipants}
+                        </span>
+
+                        {/* Hide timer on mobile */}
+                        {!isMobile && (
+                            <span style={{
+                                fontFamily:"monospace", fontSize:12, color:"#6b7280",
+                                background:"#111827", border:"1px solid #1f2937",
+                                padding:"3px 10px", borderRadius:8,
+                            }}>⏱ {fmt(elapsed)}</span>
+                        )}
+                    </div>
+
+                    <div style={{ width: isMobile ? 0 : 100 }} />
                 </div>
-
-                {/* center info */}
-                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                    <button onClick={copyCode} style={{
-                        display:"flex", alignItems:"center", gap:8, cursor:"pointer",
-                        background:"#111827", border:"1px solid #374151",
-                        borderRadius:10, padding:"5px 12px",
-                    }}>
-                        <span style={{ fontFamily:"monospace", color:"#d1d5db", fontSize:13 }}>{roomId}</span>
-                        <svg width="13" height="13" fill={copied ? "#4ade80" : "#6b7280"} viewBox="0 0 24 24">
-                            {copied
-                                ? <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                                : <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                            }
-                        </svg>
-                    </button>
-
-                    <span style={{ fontSize:12, color:"#9ca3af", display:"flex", alignItems:"center", gap:5 }}>
-                        <span style={{ width:6,height:6,background:"#22c55e",borderRadius:"50%",display:"inline-block" }}/>
-                        {totalParticipants} participant{totalParticipants !== 1 ? "s" : ""}
-                    </span>
-
-                    <span style={{
-                        fontFamily:"monospace", fontSize:12, color:"#6b7280",
-                        background:"#111827", border:"1px solid #1f2937",
-                        padding:"3px 10px", borderRadius:8,
-                    }}>⏱ {fmt(elapsed)}</span>
-                </div>
-
-                <div style={{ width:100 }} />
-            </div>
-
             {/* ── MAIN ── */}
             <div style={{ flex:1, display:"flex", minHeight:0, overflow:"hidden" }}>
 
@@ -332,24 +342,78 @@ export default function Room() {
                     </div>
 
                     {/* WHITEBOARD */}
-                    {showWhiteboard && (
-                        <div style={{ flex:1, display:"flex", flexDirection:"column", minWidth:0, minHeight:0 }}>
-                            <Whiteboard />
-                        </div>
-                    )}
+                                {showWhiteboard && (
+                                    <div style={{
+                                        ...(isMobile ? {
+                                            position: "fixed",
+                                            inset: 0,
+                                            zIndex: 25,
+                                            paddingBottom: 68,
+                                        } : {
+                                            flex: 1,
+                                        }),
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        minWidth: 0,
+                                        minHeight: 0,
+                                    }}>
+                                        {/* Floating mini videos on mobile */}
+                                        {isMobile && (
+                                            <div style={{
+                                                position: "absolute", top: 60, right: 10,
+                                                zIndex: 26, display: "flex", flexDirection: "column", gap: 8,
+                                            }}>
+                                                {allParticipants.slice(0, 2).map(({ id, stream, isLocal }) => (
+                                                    <div key={id} style={{
+                                                        width: 90, height: 120, borderRadius: 12,
+                                                        overflow: "hidden", border: "2px solid #374151",
+                                                        background: "#111827",
+                                                    }}>
+                                                        <video
+                                                            ref={el => setVideoRef(el, `mini-${id}`, stream)}
+                                                            autoPlay playsInline muted={isLocal}
+                                                            style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                                <button onClick={() => setShowWhiteboard(false)} style={{
+                                                    background: "#1f2937", border: "1px solid #374151",
+                                                    borderRadius: 10, padding: "6px 10px",
+                                                    color: "#9ca3af", fontSize: 11, cursor: "pointer",
+                                                }}>Close</button>
+                                            </div>
+                                        )}
+                                        <Whiteboard />
+                                    </div>
+                                )}
                 </div>
 
-                {/* RIGHT: Chat — flex sibling so videos shrink correctly */}
-                {showChat && (
-                    <div style={{
-                        width: 300, flexShrink:0,
-                        borderLeft:"1px solid #1f2937",
-                        display:"flex", flexDirection:"column",
-                        minHeight:0,
-                    }}>
-                        <ChatPanel onClose={() => setShowChat(false)} userName={user?.name} />
-                    </div>
-                )}
+                {/* RIGHT: Chat */}
+                    {showChat && (
+                        <div style={{
+                            // Desktop: side panel
+                            // Mobile: full screen overlay from bottom
+                            ...(isMobile ? {
+                                position: "fixed",
+                                bottom: 68,
+                                left: 0,
+                                right: 0,
+                                height: "60vh",
+                                zIndex: 30,
+                                borderTop: "1px solid #1f2937",
+                                borderRadius: "20px 20px 0 0",
+                            } : {
+                                width: 300,
+                                flexShrink: 0,
+                                borderLeft: "1px solid #1f2937",
+                            }),
+                            display: "flex",
+                            flexDirection: "column",
+                            background: "#030712",
+                        }}>
+                            <ChatPanel onClose={() => setShowChat(false)} userName={user?.name} />
+                        </div>
+                    )}
             </div>
 
             {/* ── CONTROLS ── */}

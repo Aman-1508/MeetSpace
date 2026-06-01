@@ -2,73 +2,96 @@ import { Link } from "react-router-dom";
 
 export default function Landing() {
     return (
-        <div className="min-h-screen bg-gray-950 text-white">
+        <div style={{ minHeight: "100vh", background: "#030712", color: "white" }}>
 
             {/* Navbar */}
-            <nav className="flex items-center justify-between px-8 py-5 border-b border-gray-800">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+            <nav style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "14px 20px", borderBottom: "1px solid #1f2937",
+            }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 32, height: 32, background: "#2563eb", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="18" height="18" fill="white" viewBox="0 0 24 24">
+                            <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/>
                         </svg>
                     </div>
-                    <span className="font-bold text-lg">MeetSpace</span>
+                    <span style={{ fontWeight: 700, fontSize: 16 }}>MeetSpace</span>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Link to="/login" className="text-gray-400 hover:text-white text-sm font-medium transition px-4 py-2">
-                        Sign in
-                    </Link>
-                    <Link to="/register" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition">
-                        Get started
-                    </Link>
+                <div style={{ display: "flex", gap: 8 }}>
+                    <Link to="/login" style={{
+                        color: "#9ca3af", textDecoration: "none", fontSize: 13,
+                        padding: "8px 12px", borderRadius: 10,
+                    }}>Sign in</Link>
+                    <Link to="/register" style={{
+                        background: "#2563eb", color: "white", textDecoration: "none",
+                        fontSize: 13, fontWeight: 500, padding: "8px 14px", borderRadius: 10,
+                    }}>Get started</Link>
                 </div>
             </nav>
 
             {/* Hero */}
-            <div className="flex flex-col items-center justify-center text-center px-4 pt-24 pb-16">
-
-                <div className="inline-flex items-center gap-2 bg-blue-950 border border-blue-800 text-blue-400 text-xs font-medium px-4 py-1.5 rounded-full mb-8">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+            <div style={{ textAlign: "center", padding: "60px 20px 40px" }}>
+                <div style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    background: "#172554", border: "1px solid #1e40af",
+                    color: "#60a5fa", fontSize: 12, padding: "6px 14px",
+                    borderRadius: 999, marginBottom: 24,
+                }}>
+                    <span style={{ width: 6, height: 6, background: "#60a5fa", borderRadius: "50%" }}/>
                     Free video conferencing
                 </div>
 
-                <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight max-w-3xl mb-6">
+                <h1 style={{
+                    fontSize: "clamp(28px, 6vw, 52px)",
+                    fontWeight: 700, lineHeight: 1.15,
+                    margin: "0 auto 16px", maxWidth: 600,
+                }}>
                     Video meetings for{" "}
-                    <span className="text-blue-500">everyone</span>
+                    <span style={{ color: "#3b82f6" }}>everyone</span>
                 </h1>
 
-                <p className="text-gray-400 text-lg max-w-xl mb-10">
-                    Connect instantly with video calls, screen sharing, live chat, and collaborative whiteboard — all in one place.
+                <p style={{
+                    color: "#6b7280", fontSize: "clamp(14px, 3vw, 17px)",
+                    maxWidth: 480, margin: "0 auto 32px", lineHeight: 1.6,
+                    padding: "0 10px",
+                }}>
+                    Connect instantly with HD video, screen sharing, live chat and collaborative whiteboard.
                 </p>
 
-                <div className="flex items-center gap-4">
-                    <Link to="/register" className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3.5 rounded-xl transition text-sm">
-                        Start for free
-                    </Link>
-                    <Link to="/login" className="border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white font-medium px-8 py-3.5 rounded-xl transition text-sm">
-                        Sign in
-                    </Link>
+                <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", padding: "0 20px" }}>
+                    <Link to="/register" style={{
+                        background: "#2563eb", color: "white", textDecoration: "none",
+                        fontWeight: 500, padding: "12px 28px", borderRadius: 12, fontSize: 14,
+                    }}>Start for free</Link>
+                    <Link to="/login" style={{
+                        border: "1px solid #374151", color: "#d1d5db", textDecoration: "none",
+                        fontWeight: 500, padding: "12px 28px", borderRadius: 12, fontSize: 14,
+                    }}>Sign in</Link>
                 </div>
             </div>
 
-            {/* Features */}
-            <div className="max-w-5xl mx-auto px-8 pb-24">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                        { icon: "🎥", title: "Video & Audio", desc: "HD video calls with up to 6 participants" },
-                        { icon: "🖥️", title: "Screen sharing", desc: "Share your screen with one click" },
-                        { icon: "💬", title: "Live chat", desc: "Chat during calls, history saved" },
-                        { icon: "✏️", title: "Whiteboard", desc: "Collaborate on a shared canvas" },
-                    ].map((f) => (
-                        <div key={f.title} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                            <div className="text-3xl mb-3">{f.icon}</div>
-                            <h3 className="font-semibold text-white mb-1">{f.title}</h3>
-                            <p className="text-gray-400 text-sm">{f.desc}</p>
-                        </div>
-                    ))}
-                </div>
+            {/* Features grid */}
+            <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                gap: 12, padding: "0 20px 60px", maxWidth: 860, margin: "0 auto",
+            }}>
+                {[
+                    { icon: "🎥", title: "HD Video", desc: "Crystal clear calls" },
+                    { icon: "🖥️", title: "Screen share", desc: "One click sharing" },
+                    { icon: "💬", title: "Live chat", desc: "Realtime messaging" },
+                    { icon: "✏️", title: "Whiteboard", desc: "Draw together" },
+                ].map(f => (
+                    <div key={f.title} style={{
+                        background: "#111827", border: "1px solid #1f2937",
+                        borderRadius: 16, padding: "20px 16px",
+                    }}>
+                        <div style={{ fontSize: 28, marginBottom: 10 }}>{f.icon}</div>
+                        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{f.title}</div>
+                        <div style={{ color: "#6b7280", fontSize: 12 }}>{f.desc}</div>
+                    </div>
+                ))}
             </div>
-
         </div>
     );
 }

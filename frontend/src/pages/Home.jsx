@@ -13,33 +13,24 @@ export default function Home() {
     const [loadingHistory, setLoadingHistory] = useState(true);
     const [joining, setJoining] = useState(false);
 
-    useEffect(() => {
-        fetchActivity();
-    }, []);
+    useEffect(() => { fetchActivity(); }, []);
 
     const fetchActivity = async () => {
         try {
             const { data } = await API.get("/users/get_all_activity");
             setActivity(data.activity || []);
-        } catch {
-            // silently fail if no history
-        } finally {
-            setLoadingHistory(false);
-        }
+        } catch {} finally { setLoadingHistory(false); }
     };
-    
- 
+
     const createMeeting = async () => {
         const roomId = uuidv4().slice(0, 8);
         try {
             await API.post("/users/add_to_activity", { meetingCode: roomId });
             navigate(`/room/${roomId}`);
-        } catch {
-            toast.error("Failed to create meeting");
-        }
+        } catch { toast.error("Failed to create meeting"); }
     };
 
-      const joinMeeting = async () => {
+    const joinMeeting = async () => {
         if (!joinCode.trim()) return toast.error("Enter a meeting code");
         setJoining(true);
         try {
@@ -47,166 +38,174 @@ export default function Home() {
             if (data.valid) navigate(`/room/${joinCode.trim()}`);
         } catch (err) {
             toast.error(err.response?.data?.message || "Invalid meeting code");
-        } finally {
-            setJoining(false);
-        }
+        } finally { setJoining(false); }
     };
 
-    const formatDate = (dateStr) => {
-        const d = new Date(dateStr);
-        return d.toLocaleDateString("en-IN", {
-            day: "numeric", month: "short", year: "numeric",
-            hour: "2-digit", minute: "2-digit",
-        });
-    };
+    const formatDate = (d) => new Date(d).toLocaleDateString("en-IN", {
+        day: "numeric", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+    });
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white">
+        <div style={{ minHeight: "100vh", background: "#030712", color: "white" }}>
 
             {/* Navbar */}
-            <nav className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+            <nav style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "12px 20px", borderBottom: "1px solid #1f2937",
+                position: "sticky", top: 0, background: "#030712", zIndex: 10,
+            }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 30, height: 30, background: "#2563eb", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
+                            <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/>
                         </svg>
                     </div>
-                    <span className="font-bold text-lg">MeetSpace</span>
+                    <span style={{ fontWeight: 700, fontSize: 15 }}>MeetSpace</span>
                 </div>
-
-                <div className="flex items-center gap-3">
-                    {/* Avatar */}
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center text-xs font-bold uppercase">
-                            {user?.name?.charAt(0)}
-                        </div>
-                        <span className="text-sm text-gray-300 hidden sm:block">{user?.name}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{
+                        width: 32, height: 32, borderRadius: "50%",
+                        background: "linear-gradient(135deg,#2563eb,#7c3aed)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontWeight: 700, fontSize: 13, color: "white", textTransform: "uppercase",
+                    }}>
+                        {user?.name?.charAt(0)}
                     </div>
-                    <button
-                        onClick={() => { logout(); navigate("/landing"); }}
-                        className="text-sm text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-3 py-1.5 rounded-lg transition"
-                    >
-                        Sign out
-                    </button>
+                    <button onClick={() => { logout(); navigate("/landing"); }} style={{
+                        background: "transparent", border: "1px solid #374151",
+                        color: "#9ca3af", borderRadius: 10, padding: "6px 12px",
+                        fontSize: 12, cursor: "pointer",
+                    }}>Sign out</button>
                 </div>
             </nav>
 
-            {/* Main */}
-            <div className="max-w-4xl mx-auto px-6 py-12">
+            <div style={{ maxWidth: 600, margin: "0 auto", padding: "24px 16px" }}>
 
                 {/* Greeting */}
-                <div className="mb-10">
-                    <h1 className="text-3xl font-bold text-white">
+                <div style={{ marginBottom: 24 }}>
+                    <h1 style={{ fontSize: "clamp(20px, 5vw, 26px)", fontWeight: 700, margin: "0 0 4px" }}>
                         Good {getGreeting()}, {user?.name?.split(" ")[0]} 👋
                     </h1>
-                    <p className="text-gray-400 mt-1">Start or join a meeting below.</p>
+                    <p style={{ color: "#6b7280", fontSize: 13, margin: 0 }}>Start or join a meeting</p>
                 </div>
 
-                {/* Action Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+                {/* Action cards */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12, marginBottom: 24 }}>
 
-                    {/* New Meeting */}
-                    <div className="bg-blue-600 hover:bg-blue-700 rounded-2xl p-6 cursor-pointer transition group"
-                        onClick={createMeeting}>
-                        <div className="w-12 h-12 bg-blue-500 group-hover:bg-blue-600 rounded-xl flex items-center justify-center mb-4 transition">
-                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    {/* New meeting */}
+                    <button onClick={createMeeting} style={{
+                        background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                        border: "none", borderRadius: 16, padding: "22px 20px",
+                        textAlign: "left", cursor: "pointer", width: "100%",
+                    }}>
+                        <div style={{ width: 44, height: 44, background: "rgba(255,255,255,0.15)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                            <svg width="22" height="22" fill="white" viewBox="0 0 24 24">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                             </svg>
                         </div>
-                        <h2 className="text-lg font-semibold text-white mb-1">New meeting</h2>
-                        <p className="text-blue-200 text-sm">Start an instant meeting and invite others</p>
-                    </div>
+                        <div style={{ color: "white", fontWeight: 600, fontSize: 15, marginBottom: 4 }}>New meeting</div>
+                        <div style={{ color: "#bfdbfe", fontSize: 12 }}>Start an instant meeting</div>
+                    </button>
 
-                    {/* Join Meeting */}
-                    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-                        <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center mb-4">
-                            <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                    {/* Join meeting */}
+                    <div style={{ background: "#111827", border: "1px solid #1f2937", borderRadius: 16, padding: "22px 20px" }}>
+                        <div style={{ width: 44, height: 44, background: "#1f2937", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                            <svg width="22" height="22" fill="#9ca3af" viewBox="0 0 24 24">
+                                <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
                             </svg>
                         </div>
-                        <h2 className="text-lg font-semibold text-white mb-1">Join meeting</h2>
-                        <p className="text-gray-400 text-sm mb-4">Enter a code to join an existing meeting</p>
-                        <div className="flex gap-2">
+                        <div style={{ color: "white", fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Join meeting</div>
+                        <div style={{ color: "#6b7280", fontSize: 12, marginBottom: 14 }}>Enter a code to join</div>
+                        <div style={{ display: "flex", gap: 8 }}>
                             <input
-                                type="text"
                                 value={joinCode}
-                                onChange={(e) => setJoinCode(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && joinMeeting()}
-                                placeholder="Enter meeting code"
-                                className="flex-1 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                                onChange={e => setJoinCode(e.target.value)}
+                                onKeyDown={e => e.key === "Enter" && joinMeeting()}
+                                placeholder="Meeting code"
+                                style={{
+                                    flex: 1, background: "#1f2937", border: "1px solid #374151",
+                                    borderRadius: 10, padding: "10px 14px", color: "white",
+                                    fontSize: 13, outline: "none",
+                                }}
                             />
-                            <button
-                            onClick={joinMeeting}
-                            disabled={joining}
-                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition"
-                        >
-                            {joining ? "Checking..." : "Join"}
-                        </button>
+                            <button onClick={joinMeeting} disabled={joining} style={{
+                                background: "#2563eb", color: "white", border: "none",
+                                borderRadius: 10, padding: "10px 16px", fontSize: 13,
+                                fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap",
+                            }}>
+                                {joining ? "..." : "Join"}
+                            </button>
                         </div>
                     </div>
-
                 </div>
 
-                {/* Quick Feature Icons */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
+                {/* Features pills */}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
                     {[
                         { icon: "🎥", label: "HD video" },
                         { icon: "🖥️", label: "Screen share" },
                         { icon: "💬", label: "Live chat" },
                         { icon: "✏️", label: "Whiteboard" },
-                    ].map((f) => (
-                        <div key={f.label} className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                            <span className="text-xl">{f.icon}</span>
-                            <span className="text-sm text-gray-300">{f.label}</span>
+                    ].map(f => (
+                        <div key={f.label} style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            background: "#111827", border: "1px solid #1f2937",
+                            borderRadius: 999, padding: "6px 14px", fontSize: 12, color: "#d1d5db",
+                        }}>
+                            <span>{f.icon}</span> {f.label}
                         </div>
                     ))}
                 </div>
 
-                {/* Meeting History */}
+                {/* Meeting history */}
                 <div>
-                    <h2 className="text-lg font-semibold text-white mb-4">Recent meetings</h2>
+                    <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Recent meetings</h2>
 
                     {loadingHistory ? (
-                        <div className="text-gray-500 text-sm">Loading history...</div>
+                        <div style={{ color: "#6b7280", fontSize: 13 }}>Loading...</div>
                     ) : activity.length === 0 ? (
-                        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
-                            <div className="text-4xl mb-3">📅</div>
-                            <p className="text-gray-400 text-sm">No meetings yet. Start your first one above!</p>
+                        <div style={{
+                            background: "#111827", border: "1px solid #1f2937",
+                            borderRadius: 16, padding: "32px 20px", textAlign: "center",
+                        }}>
+                            <div style={{ fontSize: 32, marginBottom: 10 }}>📅</div>
+                            <p style={{ color: "#6b7280", fontSize: 13, margin: 0 }}>No meetings yet. Start your first one!</p>
                         </div>
                     ) : (
-                        <div className="space-y-2">
-                            {activity.map((item) => (
-                                <div key={item._id}
-                                    className="bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-xl px-5 py-4 flex items-center justify-between transition group">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center">
-                                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            {activity.map(item => (
+                                <div key={item._id} style={{
+                                    background: "#111827", border: "1px solid #1f2937",
+                                    borderRadius: 14, padding: "14px 16px",
+                                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                                }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                        <div style={{ width: 38, height: 38, background: "#1f2937", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <svg width="18" height="18" fill="#6b7280" viewBox="0 0 24 24">
+                                                <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/>
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-white font-mono">{item.meetingCode}</p>
-                                            <p className="text-xs text-gray-500">{formatDate(item.date)}</p>
+                                            <div style={{ fontFamily: "monospace", fontSize: 13, color: "white", fontWeight: 500 }}>{item.meetingCode}</div>
+                                            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>{formatDate(item.date)}</div>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => navigate(`/room/${item.meetingCode}`)}
-                                        className="text-xs text-blue-400 hover:text-blue-300 border border-blue-800 hover:border-blue-600 px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition"
-                                    >
-                                        Rejoin
-                                    </button>
+                                    <button onClick={() => navigate(`/room/${item.meetingCode}`)} style={{
+                                        background: "transparent", border: "1px solid #1e40af",
+                                        color: "#60a5fa", borderRadius: 8, padding: "6px 12px",
+                                        fontSize: 12, cursor: "pointer",
+                                    }}>Rejoin</button>
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
-
             </div>
         </div>
     );
 }
 
-// Helper
 function getGreeting() {
     const h = new Date().getHours();
     if (h < 12) return "morning";

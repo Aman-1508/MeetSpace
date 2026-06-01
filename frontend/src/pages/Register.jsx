@@ -7,19 +7,15 @@ export default function Register() {
     const [form, setForm] = useState({ name: "", username: "", password: "" });
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
-    const navigate = useNavigate();
+    const navigate     = useNavigate();
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
+    const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const { name, username, password } = form;
-
-        if (!name || !username || !password) return toast.error("All fields are required");
-        if (password.length < 6) return toast.error("Password must be at least 6 characters");
-
+        if (!name || !username || !password) return toast.error("All fields required");
+        if (password.length < 6) return toast.error("Password min 6 characters");
         setLoading(true);
         try {
             await register(name, username, password);
@@ -27,90 +23,63 @@ export default function Register() {
             navigate("/");
         } catch (err) {
             toast.error(err.response?.data?.message || "Registration failed");
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
+    };
+
+    const inp = {
+        width: "100%", boxSizing: "border-box",
+        background: "#111827", border: "1px solid #374151",
+        borderRadius: 12, padding: "12px 16px",
+        color: "white", fontSize: 14, outline: "none",
     };
 
     return (
-        <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-            <div className="w-full max-w-md">
+        <div style={{ minHeight: "100vh", background: "#030712", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+            <div style={{ width: "100%", maxWidth: 400 }}>
 
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-2xl mb-4">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                <div style={{ textAlign: "center", marginBottom: 32 }}>
+                    <div style={{ width: 52, height: 52, background: "#2563eb", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                        <svg width="26" height="26" fill="white" viewBox="0 0 24 24">
+                            <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/>
                         </svg>
                     </div>
-                    <h1 className="text-2xl font-bold text-white">Create account</h1>
-                    <p className="text-gray-400 mt-1 text-sm">Start meeting in seconds</p>
+                    <h1 style={{ color: "white", fontSize: 22, fontWeight: 700, margin: "0 0 6px" }}>Create account</h1>
+                    <p style={{ color: "#6b7280", fontSize: 13, margin: 0 }}>Start meeting in seconds</p>
                 </div>
 
-                {/* Card */}
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
-                    <form onSubmit={handleSubmit} className="space-y-5">
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                                Full name
-                            </label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={form.name}
-                                onChange={handleChange}
-                                placeholder="John Doe"
-                                className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                                Username
-                            </label>
-                            <input
-                                type="text"
-                                name="username"
-                                value={form.username}
-                                onChange={handleChange}
-                                placeholder="johndoe"
-                                className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                name="password"
-                                value={form.password}
-                                onChange={handleChange}
-                                placeholder="Min. 6 characters"
-                                className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl text-sm transition"
-                        >
-                            {loading ? "Creating account..." : "Create account"}
+                <div style={{ background: "#111827", border: "1px solid #1f2937", borderRadius: 20, padding: "28px 24px" }}>
+                    <form onSubmit={handleSubmit}>
+                        {[
+                            { label: "Full name", name: "name", type: "text", placeholder: "John Doe" },
+                            { label: "Username", name: "username", type: "text", placeholder: "johndoe" },
+                            { label: "Password", name: "password", type: "password", placeholder: "Min. 6 characters" },
+                        ].map(field => (
+                            <div key={field.name} style={{ marginBottom: 16 }}>
+                                <label style={{ display: "block", color: "#d1d5db", fontSize: 13, fontWeight: 500, marginBottom: 8 }}>
+                                    {field.label}
+                                </label>
+                                <input style={inp} type={field.type} name={field.name}
+                                    value={form[field.name]} onChange={handleChange}
+                                    placeholder={field.placeholder} />
+                            </div>
+                        ))}
+                        <button type="submit" disabled={loading} style={{
+                            width: "100%", background: loading ? "#1e40af" : "#2563eb",
+                            color: "white", border: "none", borderRadius: 12,
+                            padding: "13px", fontSize: 14, fontWeight: 500,
+                            cursor: "pointer", marginTop: 4,
+                        }}>
+                            {loading ? "Creating..." : "Create account"}
                         </button>
-
                     </form>
                 </div>
 
-                <p className="text-center text-gray-500 text-sm mt-6">
-                    Already have an account?{" "}
-                    <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium transition">
+                <p style={{ textAlign: "center", color: "#6b7280", fontSize: 13, marginTop: 20 }}>
+                    Have an account?{" "}
+                    <Link to="/login" style={{ color: "#60a5fa", textDecoration: "none", fontWeight: 500 }}>
                         Sign in
                     </Link>
                 </p>
-
             </div>
         </div>
     );
